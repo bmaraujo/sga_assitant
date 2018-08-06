@@ -1,4 +1,6 @@
 {
 	"WELCOME_FIRST":["Olá, seja bem vindo ao $1, posso te ajudar a ver suas notas, faltas, ver o calendário do semestre e gerenciar atividades, o que você quer fazer agora?"],
-	"WELCOME": ["Olá, seja bem vindo de volta, o que vamos olhar agora?"]
+	"WELCOME": ["Olá, seja bem vindo de volta, o que vamos olhar agora?"],
+	"ACK" : ["OK", "Certo", "Tudo bem", "Entendi"],
+	"ASK_PUCID" : ["Parece que ainda não tenho seu número de matrícula, pode me falar?", "Para isto preciso do seu número de matrícula, pode me falar?", "Me fale seu número de matrícula."]
 }
