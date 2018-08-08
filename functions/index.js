@@ -16,9 +16,11 @@ const appName = "SGA";
 const PHRASES = {
 	ACK : 'ACK',
 	ASK_PUCID : 'ASK_PUCID',
+	MATERIA_NOT_FOUND : 'MATERIA_NOT_FOUND',
+	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
+	SUA_NOTA : 'SUA_NOTA',
 	WELCOME :  'WELCOME',
 	WELCOME_FIRST : 'WELCOME_FIRST',
-
 }
 
 const CONTEXTS = {
@@ -43,12 +45,12 @@ app.intent('Default Welcome Intent', (conv) => {
 
 	console.log(`locale? ${conv.user.locale}, aluno:${aluno}`);
 	if(!conv.user.last.seen){
-		conv.ask(getRandomEntry(dialogs[PHRASES.WELCOME_FIRST]).replace('$1',appName));
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.WELCOME_FIRST]).replace('$1',appName)));
 	}
 	else{
 		checkUpdates(conv);
 		//TODO: Select a dialog accordingly to any updates
-		conv.ask(getRandomEntry(dialogs[PHRASES.WELCOME]).replace('$1',appName));
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.WELCOME]).replace('$1',appName)));
 	}
 	
 	conv.ask(new Suggestions(['Ver Notas','Faltas','Calendário']));
@@ -70,11 +72,11 @@ app.intent('sga.buscarNota', (conv, {disciplina}) => {
 		conv.user.storage.buscarNota = disciplina;
 
 		//asks for PUC ID
-		conv.ask(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID]));
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
 	}
 	else{
 		
-		conv.ask(getGrades(disciplina));
+		conv.ask(getGrades(matricula,disciplina));
 	}
 });
 
@@ -100,8 +102,12 @@ app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 
 	console.log(`contexto:${conv.contexts.get(CONTEXTS.BUSCAR_NOTA)}`);
 	//if it was searching for grades
-	if(conv.contexts.get(CONTEXTS.BUSCAR_NOTA)){
-		conv.ask(getGrades(conv.user.storage.buscarNota));
+	if(conv.user.storage.buscarNota){
+		conv.ask(getGrades(matricula,conv.user.storage.buscarNota));
+	}
+	else{
+		//TODO
+		conv.ask('Ok, sua matricula foi salva.');
 	}
 });
 
@@ -119,14 +125,17 @@ app.intent('apagar.qualMatricula', (conv) =>{
 
 exports.sgaAssistant = functions.https.onRequest(app);
 
-function getGrades(disciplina){
+function getGrades(matricula,disciplina){
 
 	let resposta = '';
+
+	console.log(JSON.stringify(mockNotas));
+	console.log(`${matricula} : ${disciplina}`);
 
 	console.log(`somar as atividades`);
 	let materia = mockNotas[matricula][disciplina];
 	if(!materia){
-		resposta = "Não achei esta matéria na sua lista de cursados deste semestre.";
+		resposta = getRandomEntry(dialogs[PHRASES.MATERIA_NOT_FOUND]);
 		//TODO: read all subjects the student is enrolled at
 	}
 	else{
@@ -134,10 +143,10 @@ function getGrades(disciplina){
 		for(let i=0;i<materia.notas.length;i++){
 			total += materia.notas[i].nota;
 		}
-		resposta = `Sua nota é ${total}`;
+		resposta = getRandomEntry(dialogs[PHRASES.SUA_NOTA]).replace('$1',total) + getRandomEntry(dialogs[PHRASES.NOTA_MAIS_DETALHES]);
 	}
 
-	return resposta
+	return buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) + resposta);
 }
 
 function checkUpdates(conv){
@@ -152,4 +161,8 @@ function getAluno(userId){
 return new Promise(function (resolve, reject) {     
 	firebase.database().ref('/alunos/' + userId).once('value').then(function(snapshot) {       
 		resolve(snapshot.val());     }).catch(reject);   }); 
+}
+
+function buildSpeech(text){
+	return `<speak><s>${text}</s></speak>`;
 }

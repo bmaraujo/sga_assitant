@@ -1,7 +1,7 @@
 {
 	"258500" : {
-		"Estágio" : {
-			"carga" : 64,
+		"Estagio" : {
+			"carga" : 34,
 			"faltas" : 2,
 			"notas":[{
 				"atividade": "relatório agosto",
@@ -11,6 +11,21 @@
 				"atividade": "relatório setembro",
 				"nota": 10
 			}]
+		},
+		"SIGE" : {
+			"carga" : 68,
+			"faltas" : 0,
+			"notas":[]
+		},
+		"EMPTI" : {
+			"carga" : 68,
+			"faltas" : 4,
+			"notas":[]
+		},
+		"TCC" : {
+			"carga" : 34,
+			"faltas" : 0,
+			"notas":[]
 		}
 	}
 }
