@@ -15,9 +15,12 @@ const appName = "SGA";
 
 const PHRASES = {
 	ACK : 'ACK',
+	ALGO_MAIS : 'ALGO_MAIS',
 	ASK_PUCID : 'ASK_PUCID',
 	MATERIA_NOT_FOUND : 'MATERIA_NOT_FOUND',
 	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
+	QTD_FALTAS : 'QTD_FALTAS',
+	QTD_FALTAS_ZERO : 'QTD_FALTAS_ZERO',
 	SUA_NOTA : 'SUA_NOTA',
 	WELCOME :  'WELCOME',
 	WELCOME_FIRST : 'WELCOME_FIRST',
@@ -26,6 +29,7 @@ const PHRASES = {
 const CONTEXTS = {
 	BUSCAR_NOTA : "BUSCAR_NOTA",
 	BUSCAR_ALUNO : "BUSCAR_ALUNO",
+	BUSCAR_FALTAS : "BUSCAR_FALTAS",
 }
 
 const config = {
@@ -69,7 +73,8 @@ app.intent('sga.buscarNota', (conv, {disciplina}) => {
 		// raise the lifespan of BUSCAR_NOTA contexts
 		conv.contexts.set(CONTEXTS.BUSCAR_NOTA,15);
 
-		conv.user.storage.buscarNota = disciplina;
+		conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_NOTA;
+		conv.user.storage.disciplina = disciplina;
 
 		//asks for PUC ID
 		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
@@ -101,13 +106,35 @@ app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 	console.log(`contexts:${JSON.stringify(conv.contexts)}`);
 
 	console.log(`contexto:${conv.contexts.get(CONTEXTS.BUSCAR_NOTA)}`);
-	//if it was searching for grades
-	if(conv.user.storage.buscarNota){
-		conv.ask(getGrades(matricula,conv.user.storage.buscarNota));
+
+	followUpObterMatricula(matricula);
+	
+});
+
+app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
+
+
+
+	conv.contexts.set(CONTEXTS.BUSCAR_FALTAS,5);
+
+	let matricula = conv.user.storage.matricula; 
+	console.log(`matricula: ${matricula}`);
+	if(!matricula){
+		console.log(`perguntar matricula`);
+		//no student id found, ask for it
+		conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
+		// raise the lifespan of BUSCAR_FALTAS contexts
+		conv.contexts.set(CONTEXTS.BUSCAR_FALTAS,15);
+
+		conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_FALTAS;
+		conv.user.storage.disciplina = disciplina;
+
+		//asks for PUC ID
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
 	}
 	else{
-		//TODO
-		conv.ask('Ok, sua matricula foi salva.');
+		
+		conv.ask(getAttendance(matricula,disciplina));
 	}
 });
 
@@ -124,6 +151,57 @@ app.intent('apagar.qualMatricula', (conv) =>{
 });
 
 exports.sgaAssistant = functions.https.onRequest(app);
+
+function followUpObterMatricula(matricula) {
+
+	let disciplina = conv.user.storage.disciplina;
+
+	//if it was searching for grades
+	if(conv.user.storage.proximaAcao === CONTEXTS.BUSCAR_NOTA){
+		conv.ask(getGrades(matricula,disciplina));
+	}
+	else if(conv.user.storage.proximaAcao === CONTEXTS.BUSCAR_FALTAS){
+		conv.ask(getAttendance(matricula,disciplina));
+	}
+	else{
+		//TODO
+		conv.ask('Ok, sua matricula foi salva.');
+	}
+}
+
+function getAttendance(matricula,disciplina){
+
+	let resposta = '';
+
+	console.log(JSON.stringify(mockNotas));
+	console.log(`${matricula} : ${disciplina}`);
+
+	console.log(`somar as faltas`);
+	let materia = mockNotas[matricula][disciplina];
+	if(!materia){
+		resposta = getRandomEntry(dialogs[PHRASES.MATERIA_NOT_FOUND]);
+		//TODO: read all subjects the student is enrolled at
+	}
+	else{
+		let aulas = materia.carga;
+		let faltas = materia.faltas;
+		if(faltas == 0){
+			resposta = getRandomEntry(dialogs[PHRASES.QTD_FALTAS_ZERO]);
+		}
+		else{
+			//Trata uma ou duas faltas por causa do gênero
+			if(faltas == 1){
+				faltas = `<sub alias="uma">1</sub>`;
+			}
+			else if(faltas == 2){
+				faltas = `<sub alias="duas">2</sub>`;
+			}
+			resposta = getRandomEntry(dialogs[PHRASES.QTD_FALTAS]).replace('$1',faltas);
+		}
+	}
+
+	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`);
+}
 
 function getGrades(matricula,disciplina){
 
@@ -143,10 +221,10 @@ function getGrades(matricula,disciplina){
 		for(let i=0;i<materia.notas.length;i++){
 			total += materia.notas[i].nota;
 		}
-		resposta = getRandomEntry(dialogs[PHRASES.SUA_NOTA]).replace('$1',total) + getRandomEntry(dialogs[PHRASES.NOTA_MAIS_DETALHES]);
+		resposta = getRandomEntry(dialogs[PHRASES.SUA_NOTA]).replace('$1',total);
 	}
 
-	return buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) + resposta);
+	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.NOTA_MAIS_DETALHES])}`);
 }
 
 function checkUpdates(conv){

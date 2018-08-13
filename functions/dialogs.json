@@ -3,7 +3,10 @@
 	"WELCOME": ["Olá, seja bem vindo de volta, o que vamos olhar agora?"],
 	"ACK" : ["OK", "Certo", "Tudo bem", "Entendi"],
 	"ASK_PUCID" : ["Parece que ainda não tenho seu número de matrícula.</s><s>Pode me falar?", "Para isto preciso do seu número de matrícula.</s><s>Pode me falar?", "Me fale seu número de matrícula."],
-	"SUA_NOTA" : ["Sua nota é $1 pontos", "Até agora você está com $1 pontos", "Você tem $1 pontos"],
+	"SUA_NOTA" : ["Sua nota é $1 pontos.", "Até agora você está com $1 pontos.", "Você tem $1 pontos."],
 	"MATERIA_NOT_FOUND" : ["Não achei esta matéria na sua lista de matérias cursadas deste semestre."],
-	"NOTA_MAIS_DETALHES" : ["Quer mais detalhes da sua nota?","Quer ver as notas de todas as atividades da matéria?"]
+	"NOTA_MAIS_DETALHES" : ["Quer mais detalhes da sua nota?","Quer ver as notas de todas as atividades da matéria?"],
+	"QTD_FALTAS" : ["Você possui $1 faltas.", "Até agora são $1 faltas."],
+	"QTD_FALTAS_ZERO" : ["Você não possui nenhuma falta.", "Você ainda não faltou nenhuma vez."],
+	"ALGO_MAIS" : ["Mais alguma coisa?", "Com o que mais eu posso ajudar?"]
 }
