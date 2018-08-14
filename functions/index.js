@@ -6,6 +6,7 @@ const {
 const dialogs = JSON.parse(fs.readFileSync('./dialogs.json', 'utf8'));
 const mockAlunos = JSON.parse(fs.readFileSync('./mockAlunos.json', 'utf8'));
 const mockNotas = JSON.parse(fs.readFileSync('./mockNotas.json', 'utf8'));
+const calendario = JSON.parse(fs.readFileSync('./calendario.json', 'utf8'));
 
 const firebase = require('firebase');
 
@@ -21,6 +22,7 @@ const PHRASES = {
 	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
 	QTD_FALTAS : 'QTD_FALTAS',
 	QTD_FALTAS_ZERO : 'QTD_FALTAS_ZERO',
+	SEMESTRE_LETIVO : 'SEMESTRE_LETIVO',
 	SUA_NOTA : 'SUA_NOTA',
 	WELCOME :  'WELCOME',
 	WELCOME_FIRST : 'WELCOME_FIRST',
@@ -41,11 +43,9 @@ const config = {
 
 firebase.initializeApp(config);
 
-let aluno;
-
 app.intent('Default Welcome Intent', (conv) => {
 
-	aluno = getAluno(conv.user.id);
+	let aluno = conv.user.storage.aluno;
 
 	console.log(`locale? ${conv.user.locale}, aluno:${aluno}`);
 	if(!conv.user.last.seen){
@@ -94,13 +94,15 @@ app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 	//TODO: USE SGA service to get the real names
 	if(mockAlunos[matricula]){
 
-		aluno = mockAlunos[matricula];
+		let aluno = mockAlunos[matricula];
 
 		console.log(`aluno: ${aluno}`);
 
-		firebase.database().ref('/alunos/' + matricula).set({
-			name: aluno.nome
-		});
+		conv.user.storage.aluno = aluno;
+
+		// firebase.database().ref('/alunos/' + matricula).set({
+		// 	name: aluno.nome
+		// });
 	}
 
 	console.log(`contexts:${JSON.stringify(conv.contexts)}`);
@@ -138,8 +140,20 @@ app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
 	}
 });
 
+app.intent('sga.calendario.semestre_letivo',(conv) =>{
+
+	let semestre_letivo = getSemestreLetivo();
+
+	let inicio = getDateSpeech(semestre_letivo.semestre_letivo.inicio);
+	let fim = getDateSpeech(semestre_letivo.semestre_letivo.fim);
+
+	let resposta = getRandomEntry(dialogs[PHRASES.SEMESTRE_LETIVO]).replace('$1',inicio).replace('$2',fim);
+
+	conv.ask(buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`));
+
+});
+
 app.intent('apagar.resetaAluno', (conv) => {
-	aluno = undefined;
 	conv.user.storage = undefined;
 	conv.ask('Aluno apagado');
 });
@@ -151,6 +165,33 @@ app.intent('apagar.qualMatricula', (conv) =>{
 });
 
 exports.sgaAssistant = functions.https.onRequest(app);
+
+function getDateSpeech(_date){
+	let __date = new Date(_date);
+
+	let resposta = `<say-as interpret-as="date" format="ddmm">${__date.getDate()}/${__date.getMonth()+1}</say-as>`;
+
+	console.log(`getDateSpeech: ${resposta}`);
+
+	return resposta;
+}
+
+function getSemestreLetivo(){
+	let curDate = new Date();
+	let endSem1 = new Date();
+	endSem1.setMonth(5);
+	endSem1.setDate(30);
+
+	let sem=-1;
+	if((curDate - endSem1)<0){
+		sem = 1;
+	}
+	else{
+		sem = 2;
+	}
+
+	return calendario[sem];
+}
 
 function followUpObterMatricula(matricula) {
 
