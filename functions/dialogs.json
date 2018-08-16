@@ -15,5 +15,9 @@
 	"AULA_TODO_PERIODO" : ["Haverá aula normalmente no período."],
 	"NAO_AULA_TODO_PERIODO" : ["Não tem aula nenhum destes dias."],
 	"NAO_AULA_PERIODO" : ["Não tem aula nos dias $1, nos outros dias, aula normal."],
-	"AULA_PERIODO" : ["Nos dias $1 haverá aula normal, no restante dos dias não."]
+	"AULA_PERIODO" : ["Nos dias $1 haverá aula normal, no restante dos dias não."],
+	"HORARIO_SEM_AULA":["Neste dia você não faz nenhuma matéria.","Você não tem aula neste dia.", "Você não tem aula"],
+	"HORARIO_SO_UMA_AULA" : ["Você só tem aula de $1.", "Está tranquilo, só tem $1"],
+	"HORARIO_AULA" : ["Primeiro você tem aula de $1, ", "Começa com $1", "Pra começar você tem $1"],
+	"HORARIO_MAIS_AULA" : ["e depois aula de $1", "em seguida tem $1", "logo depois tem $1", "$1 na sequência", "depois tem $1"]
 }

@@ -20,6 +20,10 @@ const PHRASES = {
 	ASK_PUCID : 'ASK_PUCID',
 	AULA_PERIODO : 'AULA_PERIODO',
 	AULA_TODO_PERIODO : 'AULA_TODO_PERIODO',
+	HORARIO_AULA : "HORARIO_AULA",
+	HORARIO_MAIS_AULA : "HORARIO_MAIS_AULA",
+	HORARIO_SEM_AULA : "HORARIO_SEM_AULA",
+	HORARIO_SO_UMA_AULA : "HORARIO_SO_UMA_AULA",
 	MATERIA_NOT_FOUND : 'MATERIA_NOT_FOUND',
 	NAO_AULA_PERIODO : 'NAO_AULA_PERIODO',
 	NAO_AULA_TODO_PERIODO : 'NAO_AULA_TODO_PERIODO',
@@ -38,6 +42,7 @@ const CONTEXTS = {
 	BUSCAR_NOTA : "BUSCAR_NOTA",
 	BUSCAR_ALUNO : "BUSCAR_ALUNO",
 	BUSCAR_FALTAS : "BUSCAR_FALTAS",
+	QUADRO_HORARIO : "QUADRO_HORARIO",
 }
 
 const config = {
@@ -244,6 +249,32 @@ app.intent('sga.calendario.aulaDia',(conv, {dia}) =>{
 	conv.ask(buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`));
 });
 
+app.intent('sga.calendario.horario', (conv,{dia}) =>{
+
+	conv.contexts.set(CONTEXTS.QUADRO_HORARIO,5);
+
+	let matricula = conv.user.storage.matricula; 
+	console.log(`matricula: ${matricula}`);
+	if(!matricula){
+		console.log(`perguntar matricula`);
+		//no student id found, ask for it
+		conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
+		// raise the lifespan of QUADRO_HORARIO contexts
+		conv.contexts.set(CONTEXTS.QUADRO_HORARIO,15);
+
+		conv.user.storage.proximaAcao = CONTEXTS.QUADRO_HORARIO;
+		conv.user.storage.dia = dia;
+
+		//asks for PUC ID
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+	}
+	else{
+		
+		conv.ask(getClassSchedule(matricula,dia));
+	}
+
+});
+
 app.intent('apagar.resetaAluno', (conv) => {
 	conv.user.storage = undefined;
 	conv.ask('Aluno apagado');
@@ -256,6 +287,67 @@ app.intent('apagar.qualMatricula', (conv) =>{
 });
 
 exports.sgaAssistant = functions.https.onRequest(app);
+
+function getClassSchedule(matricula, dia){
+
+	let aluno = mockAlunos[matricula];
+
+	console.log(`aluno:${JSON.stringify(aluno)}`);
+	console.log(`dia:${dia}, Date(dia):${new Date(dia)}`);
+	let diaSemana = new Date(dia).getDay();
+
+	console.log(`diaSemana:${diaSemana}, diaSemana-1: ${diaSemana-1}`);
+
+	let horario = aluno.horario[diaSemana-1];
+
+	let resposta ="";
+
+	console.log(`horario: ${JSON.stringify(horario)}`);
+
+	console.log(`aluno.disciplinas:${JSON.stringify(aluno.disciplinas)}`);
+
+	if(horario && horario.aulas && horario.aulas.length > 0){
+		if(horario.aulas.length == 1){
+			resposta = getRandomEntry(dialogs[PHRASES.HORARIO_SO_UMA_AULA]).replace('$1',getClassName(horario.aulas[0].materia,aluno.disciplinas));
+		}
+		else{
+			for(let i=0;i<horario.aulas.length;i++){
+				if(i == 0){
+					resposta = getRandomEntry(dialogs[PHRASES.HORARIO_AULA]).replace('$1',getClassName(horario.aulas[i].materia,aluno.disciplinas)) + ' ';
+				}
+				else{
+					resposta += getRandomEntry(dialogs[PHRASES.HORARIO_MAIS_AULA]).replace('$1',getClassName(horario.aulas[i].materia,aluno.disciplinas));
+					if(i< horario.aulas.length -1){
+						resposta += ", ";
+					}
+					else{
+						resposta += ".";
+					}
+				}
+			}
+		}
+	}
+	else{
+		resposta = getRandomEntry(dialogs[PHRASES.HORARIO_SEM_AULA]);
+	}
+
+	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`);
+}
+
+function getClassName(codigo,disciplinas){
+	console.log(`codigo:${codigo}, disciplinas:${JSON.stringify(disciplinas)}`);
+	let nome = undefined;
+	let i=0;
+	while(!nome && i < disciplinas.length){
+		console.log(`${disciplinas[i].codigo} == ${codigo}?${disciplinas[i].codigo == codigo}`);
+		if(disciplinas[i].codigo == codigo){
+			nome = disciplinas[i].nome;
+		}
+		i++;
+	}
+	console.log(nome);
+	return nome;
+}
 
 function getDateSpeech(_date){
 	let __date = new Date(_date);
@@ -294,6 +386,9 @@ function followUpObterMatricula(matricula) {
 	}
 	else if(conv.user.storage.proximaAcao === CONTEXTS.BUSCAR_FALTAS){
 		conv.ask(getAttendance(matricula,disciplina));
+	}
+	else if(conv.user.storage.proximaAcao === CONTEXTS.QUADRO_HORARIO){
+		getClassSchedule(matricula,conv.user.storage.dia)
 	}
 	else{
 		//TODO
