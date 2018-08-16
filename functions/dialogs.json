@@ -8,5 +8,12 @@
 	"NOTA_MAIS_DETALHES" : ["Quer mais detalhes da sua nota?","Quer ver as notas de todas as atividades da matéria?"],
 	"QTD_FALTAS" : ["Você possui $1 faltas.", "Até agora são $1 faltas."],
 	"QTD_FALTAS_ZERO" : ["Você não possui nenhuma falta.", "Você ainda não faltou nenhuma vez."],
-	"ALGO_MAIS" : ["Mais alguma coisa?", "Com o que mais eu posso ajudar?"]
+	"ALGO_MAIS" : ["Mais alguma coisa?", "Com o que mais eu posso ajudar?"],
+	"SEMESTRE_LETIVO" : ["Neste semestre as aulas se iniciam em $1 e terminam em $2", "Neste semestre o período de aulas é de $1 a $2"],
+	"TEM_AULA_DIA" : ["Sim, terá aula normalmente.", "Tem sim."],
+	"NAO_TEM_AULA_DIA" : ["Não, nâo tem aula.", "Não vai ter aula, aproveite."],
+	"AULA_TODO_PERIODO" : ["Haverá aula normalmente no período."],
+	"NAO_AULA_TODO_PERIODO" : ["Não tem aula nenhum destes dias."],
+	"NAO_AULA_PERIODO" : ["Não tem aula nos dias $1, nos outros dias, aula normal."],
+	"AULA_PERIODO" : ["Nos dias $1 haverá aula normal, no restante dos dias não."]
 }

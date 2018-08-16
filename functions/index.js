@@ -6,6 +6,7 @@ const {
 const dialogs = JSON.parse(fs.readFileSync('./dialogs.json', 'utf8'));
 const mockAlunos = JSON.parse(fs.readFileSync('./mockAlunos.json', 'utf8'));
 const mockNotas = JSON.parse(fs.readFileSync('./mockNotas.json', 'utf8'));
+const calendario = JSON.parse(fs.readFileSync('./calendario.json', 'utf8'));
 
 const firebase = require('firebase');
 
@@ -17,11 +18,18 @@ const PHRASES = {
 	ACK : 'ACK',
 	ALGO_MAIS : 'ALGO_MAIS',
 	ASK_PUCID : 'ASK_PUCID',
+	AULA_PERIODO : 'AULA_PERIODO',
+	AULA_TODO_PERIODO : 'AULA_TODO_PERIODO',
 	MATERIA_NOT_FOUND : 'MATERIA_NOT_FOUND',
+	NAO_AULA_PERIODO : 'NAO_AULA_PERIODO',
+	NAO_AULA_TODO_PERIODO : 'NAO_AULA_TODO_PERIODO',
+	NAO_TEM_AULA_DIA : 'NAO_TEM_AULA_DIA',
 	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
 	QTD_FALTAS : 'QTD_FALTAS',
 	QTD_FALTAS_ZERO : 'QTD_FALTAS_ZERO',
+	SEMESTRE_LETIVO : 'SEMESTRE_LETIVO',
 	SUA_NOTA : 'SUA_NOTA',
+	TEM_AULA_DIA : 'TEM_AULA_DIA',
 	WELCOME :  'WELCOME',
 	WELCOME_FIRST : 'WELCOME_FIRST',
 }
@@ -41,11 +49,9 @@ const config = {
 
 firebase.initializeApp(config);
 
-let aluno;
-
 app.intent('Default Welcome Intent', (conv) => {
 
-	aluno = getAluno(conv.user.id);
+	let aluno = conv.user.storage.aluno;
 
 	console.log(`locale? ${conv.user.locale}, aluno:${aluno}`);
 	if(!conv.user.last.seen){
@@ -94,13 +100,15 @@ app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 	//TODO: USE SGA service to get the real names
 	if(mockAlunos[matricula]){
 
-		aluno = mockAlunos[matricula];
+		let aluno = mockAlunos[matricula];
 
 		console.log(`aluno: ${aluno}`);
 
-		firebase.database().ref('/alunos/' + matricula).set({
-			name: aluno.nome
-		});
+		conv.user.storage.aluno = aluno;
+
+		// firebase.database().ref('/alunos/' + matricula).set({
+		// 	name: aluno.nome
+		// });
 	}
 
 	console.log(`contexts:${JSON.stringify(conv.contexts)}`);
@@ -138,8 +146,105 @@ app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
 	}
 });
 
+app.intent('sga.calendario.semestre_letivo',(conv) =>{
+
+	let semestre_letivo = getSemestreLetivo();
+
+	let inicio = getDateSpeech(semestre_letivo.semestre_letivo.inicio);
+	let fim = getDateSpeech(semestre_letivo.semestre_letivo.fim);
+
+	let resposta = getRandomEntry(dialogs[PHRASES.SEMESTRE_LETIVO]).replace('$1',inicio).replace('$2',fim);
+
+	conv.ask(buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`));
+
+});
+
+app.intent('sga.calendario.aulaDia',(conv, {dia}) =>{
+
+	console.log(`raw dia:${dia}`);
+
+	let semestre_letivo = getSemestreLetivo();
+
+	let resposta;
+
+	if(dia){
+		console.log(`isObject:${typeof dia === "object"}`);
+		//if dia is a date
+		if(!(typeof dia === "object")){
+			console.log(`um dia:${dia}`);
+			let temAula = true;
+			let i=0; 
+			while(i<semestre_letivo.semestre_letivo.feriados.length && temAula){
+				let feriado = new Date(semestre_letivo.semestre_letivo.feriados[i++]);
+				console.log(`${feriado}=${dateDiffInDays(feriado,new Date(dia))}`);
+				if(dateDiffInDays(feriado,new Date(dia)) == 0){
+					temAula = false;
+				}
+			}
+			console.log(`tem aula?${temAula}`);
+			if(temAula){
+				resposta = getRandomEntry(dialogs[PHRASES.TEM_AULA_DIA]);
+			}
+			else{
+				resposta = getRandomEntry(dialogs[PHRASES.NAO_TEM_AULA_DIA]);
+			}
+		}
+		else{
+			//Could be a period 
+			let startDate = dia.startDate; 
+			startDate.setDate(startDate.getDate() +1);//sunday is the first day
+			let endDate = dia.endDate;
+
+			console.log(`de ${startDate} a ${endDate}`);
+
+			let qtdDias = (endDate - startDate)/1000/60/60/24; // miliseconds/seconds/minutes/hours
+
+			console.log(`qtdDias:${qtdDias}`);
+
+			let i=0;
+			let _dia = startDate;
+			let semAula = 0;
+			let dias = [];
+
+			while(i<qtdDias){
+				let j =0;
+				while(j<semestre_letivo.semestre_letivo.feriados.length && temAula){
+					let feriado = new Date(semestre_letivo.semestre_letivo.feriados[j++]);
+					console.log(`${feriado}=${feriado - _dia}`);
+					if((feriado - _dia) == 0){
+						semAula++;
+						temAula = false;
+					}
+				}
+				dias.push(temAula);
+				i++;
+				_dia.setDate(_dia.getDate()+1);
+			}
+
+			if(semAula == 0){
+				//todos os dias tem aula
+				resposta = getRandomEntry(dialogs[PHRASES.AULA_TODO_PERIODO]);
+			}
+			else if(semAula == qtdDias){
+				//nenhum dia tem aula
+				resposta = getRandomEntry(dialogs[PHRASES.NAO_AULA_TODO_PERIODO]);
+			}
+			else if(semAula > (qtdDias/2)){
+				//mais sem aula do que com aula
+				resposta = getRandomEntry(dialogs[PHRASES.NAO_AULA_PERIODO]);
+			}
+			else{
+				//mais com aula do que sem aula
+				resposta = getRandomEntry(dialogs[PHRASES.AULA_PERIODO]);
+			}
+		}
+
+	}
+
+	conv.ask(buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`));
+});
+
 app.intent('apagar.resetaAluno', (conv) => {
-	aluno = undefined;
 	conv.user.storage = undefined;
 	conv.ask('Aluno apagado');
 });
@@ -151,6 +256,33 @@ app.intent('apagar.qualMatricula', (conv) =>{
 });
 
 exports.sgaAssistant = functions.https.onRequest(app);
+
+function getDateSpeech(_date){
+	let __date = new Date(_date);
+
+	let resposta = `<say-as interpret-as="date" format="ddmm">${__date.getDate()}/${__date.getMonth()+1}</say-as>`;
+
+	console.log(`getDateSpeech: ${resposta}`);
+
+	return resposta;
+}
+
+function getSemestreLetivo(){
+	let curDate = new Date();
+	let endSem1 = new Date();
+	endSem1.setMonth(5);
+	endSem1.setDate(30);
+
+	let sem=-1;
+	if((curDate - endSem1)<0){
+		sem = 1;
+	}
+	else{
+		sem = 2;
+	}
+
+	return calendario[sem];
+}
 
 function followUpObterMatricula(matricula) {
 
@@ -243,4 +375,11 @@ return new Promise(function (resolve, reject) {
 
 function buildSpeech(text){
 	return `<speak><s>${text}</s></speak>`;
+}
+
+function dateDiffInDays(d1,d2){
+	const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+	const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+
+	return Math.floor((utc1-utc2)/(1000*60*60*24));
 }
