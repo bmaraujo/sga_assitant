@@ -18,12 +18,18 @@ const PHRASES = {
 	ACK : 'ACK',
 	ALGO_MAIS : 'ALGO_MAIS',
 	ASK_PUCID : 'ASK_PUCID',
+	AULA_PERIODO : 'AULA_PERIODO',
+	AULA_TODO_PERIODO : 'AULA_TODO_PERIODO',
 	MATERIA_NOT_FOUND : 'MATERIA_NOT_FOUND',
+	NAO_AULA_PERIODO : 'NAO_AULA_PERIODO',
+	NAO_AULA_TODO_PERIODO : 'NAO_AULA_TODO_PERIODO',
+	NAO_TEM_AULA_DIA : 'NAO_TEM_AULA_DIA',
 	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
 	QTD_FALTAS : 'QTD_FALTAS',
 	QTD_FALTAS_ZERO : 'QTD_FALTAS_ZERO',
 	SEMESTRE_LETIVO : 'SEMESTRE_LETIVO',
 	SUA_NOTA : 'SUA_NOTA',
+	TEM_AULA_DIA : 'TEM_AULA_DIA',
 	WELCOME :  'WELCOME',
 	WELCOME_FIRST : 'WELCOME_FIRST',
 }
@@ -151,6 +157,91 @@ app.intent('sga.calendario.semestre_letivo',(conv) =>{
 
 	conv.ask(buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`));
 
+});
+
+app.intent('sga.calendario.aulaDia',(conv, {dia}) =>{
+
+	console.log(`raw dia:${dia}`);
+
+	let semestre_letivo = getSemestreLetivo();
+
+	let resposta;
+
+	if(dia){
+		console.log(`isObject:${typeof dia === "object"}`);
+		//if dia is a date
+		if(!(typeof dia === "object")){
+			console.log(`um dia:${dia}`);
+			let temAula = true;
+			let i=0; 
+			while(i<semestre_letivo.semestre_letivo.feriados.length && temAula){
+				let feriado = new Date(semestre_letivo.semestre_letivo.feriados[i++]);
+				console.log(`${feriado}=${dateDiffInDays(feriado,new Date(dia))}`);
+				if(dateDiffInDays(feriado,new Date(dia)) == 0){
+					temAula = false;
+				}
+			}
+			console.log(`tem aula?${temAula}`);
+			if(temAula){
+				resposta = getRandomEntry(dialogs[PHRASES.TEM_AULA_DIA]);
+			}
+			else{
+				resposta = getRandomEntry(dialogs[PHRASES.NAO_TEM_AULA_DIA]);
+			}
+		}
+		else{
+			//Could be a period 
+			let startDate = dia.startDate; 
+			startDate.setDate(startDate.getDate() +1);//sunday is the first day
+			let endDate = dia.endDate;
+
+			console.log(`de ${startDate} a ${endDate}`);
+
+			let qtdDias = (endDate - startDate)/1000/60/60/24; // miliseconds/seconds/minutes/hours
+
+			console.log(`qtdDias:${qtdDias}`);
+
+			let i=0;
+			let _dia = startDate;
+			let semAula = 0;
+			let dias = [];
+
+			while(i<qtdDias){
+				let j =0;
+				while(j<semestre_letivo.semestre_letivo.feriados.length && temAula){
+					let feriado = new Date(semestre_letivo.semestre_letivo.feriados[j++]);
+					console.log(`${feriado}=${feriado - _dia}`);
+					if((feriado - _dia) == 0){
+						semAula++;
+						temAula = false;
+					}
+				}
+				dias.push(temAula);
+				i++;
+				_dia.setDate(_dia.getDate()+1);
+			}
+
+			if(semAula == 0){
+				//todos os dias tem aula
+				resposta = getRandomEntry(dialogs[PHRASES.AULA_TODO_PERIODO]);
+			}
+			else if(semAula == qtdDias){
+				//nenhum dia tem aula
+				resposta = getRandomEntry(dialogs[PHRASES.NAO_AULA_TODO_PERIODO]);
+			}
+			else if(semAula > (qtdDias/2)){
+				//mais sem aula do que com aula
+				resposta = getRandomEntry(dialogs[PHRASES.NAO_AULA_PERIODO]);
+			}
+			else{
+				//mais com aula do que sem aula
+				resposta = getRandomEntry(dialogs[PHRASES.AULA_PERIODO]);
+			}
+		}
+
+	}
+
+	conv.ask(buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`));
 });
 
 app.intent('apagar.resetaAluno', (conv) => {
@@ -284,4 +375,11 @@ return new Promise(function (resolve, reject) {
 
 function buildSpeech(text){
 	return `<speak><s>${text}</s></speak>`;
+}
+
+function dateDiffInDays(d1,d2){
+	const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+	const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+
+	return Math.floor((utc1-utc2)/(1000*60*60*24));
 }
