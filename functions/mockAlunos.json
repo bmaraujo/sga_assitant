@@ -1,6 +1,69 @@
 {
 	"258500" : {
 		"nome" : "Bruno",
-		"disciplinas": ["Estágio", "TCC 2"]
+		"disciplinas": [{
+			"codigo":"0509.1.00",
+			"nome" : "Sistemas Integrados de Gestão Empresarial",
+			"sinonimos": ["SIGE","Sistemas Integrados","Gestão Empresarial"]
+		},
+		{
+			"codigo":"8907.1.00",
+			"nome": "Empreendedorismo em Tecnologia da Informação",
+			"sinonimos": ["ETI", "Empreendedorismo", "Empreendedorismo em TI", "EMPTI"]
+		},
+		{
+			"codigo":"4551.1.01",
+			"nome":"Estágio Curricular",
+			"sinonimos": ["Estágio"]
+		},
+		{
+			"codigo":"0515.1.01",
+			"nome":"Trabalho de Conclusão de Curso II",
+			"sinonimos": ["TCC2","TCC 2", "TCC"]
+		}],
+		"horario":[{
+			"diaSemana": 1,
+			"aulas":""
+		},
+		{
+			"diaSemana": 2,
+			"aulas":[{
+				"materia": "0509.1.00",
+				"hora": ""
+			}]
+		},
+		{
+			"diaSemana": 3,
+			"aulas":[{
+				"materia": "8907.1.00",
+				"hora": ""
+			},
+			{
+				"materia": "8907.1.00",
+				"hora": ""
+			}]
+		},
+		{
+			"diaSemana": 4,
+			"aulas": ""
+		},
+		{
+			"diaSemana": 5,
+			"aulas":[{
+				"materia": "0515.1.01",
+				"hora": ""
+			}]
+		},
+		{
+			"diaSemana": 6,
+			"aulas":[{
+				"materia": "4551.1.01",
+				"hora": ""
+			},
+			{
+				"materia": "0509.1.00",
+				"hora": ""
+			}]
+		}]
 	}
 }
