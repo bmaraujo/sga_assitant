@@ -32,7 +32,10 @@
 		"0408.1.00" : {
 			"carga" : 34,
 			"faltas" : 0,
-			"notas":[]
+			"notas":[{
+				"atividade": "trabalho em grupo 1",
+				"nota": 10
+			},]
 		},
 		"1050.1.00" : {
 			"carga" : 68,
@@ -58,6 +61,16 @@
 			"carga" : 34,
 			"faltas" : 0,
 			"notas":[]
+		}
+	},
+	"040679" : {
+		"0515.1.01" : {
+			"carga" : 34,
+			"faltas" : 2,
+			"notas":[{
+				"atividade": "Ponto de Controle 1",
+				"nota": 10
+			}]
 		}
 	}
 }
