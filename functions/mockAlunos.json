@@ -156,5 +156,40 @@
 			"diaSemana": 6,
 			"aulas":""
 		}]
+	},
+	"040679" : {
+		"nome" : "Marcelo",
+		"disciplinas": [{
+			"codigo":"0515.1.01",
+			"nome":"Trabalho de Conclusão de Curso",
+			"sinonimos": ["TCC2","TCC 2", "TCC","Trabalho de Conclusão"]
+		}],
+		"horario":[{
+			"diaSemana": 1,
+			"aulas":[{
+				"materia": "0515.1.01",
+				"hora":""
+			}]
+		},
+		{
+			"diaSemana": 2,
+			"aulas":""
+		},
+		{
+			"diaSemana": 3,
+			"aulas":""
+		},
+		{
+			"diaSemana": 4,
+			"aulas": ""
+		},
+		{
+			"diaSemana": 5,
+			"aulas":""
+		},
+		{
+			"diaSemana": 6,
+			"aulas":""
+		}]
 	}
 }
