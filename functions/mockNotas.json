@@ -1,6 +1,6 @@
 {
 	"258500" : {
-		"Estagio" : {
+		"4551.1.01" : {
 			"carga" : 34,
 			"faltas" : 2,
 			"notas":[{
@@ -12,17 +12,49 @@
 				"nota": 10
 			}]
 		},
-		"SIGE" : {
+		"0509.1.00" : {
 			"carga" : 68,
 			"faltas" : 0,
 			"notas":[]
 		},
-		"EMPTI" : {
+		"8907.1.00" : {
 			"carga" : 68,
 			"faltas" : 4,
 			"notas":[]
 		},
-		"TCC" : {
+		"0515.1.01" : {
+			"carga" : 34,
+			"faltas" : 0,
+			"notas":[]
+		}
+	},
+	"579878" : {
+		"0408.1.00" : {
+			"carga" : 34,
+			"faltas" : 0,
+			"notas":[]
+		},
+		"1050.1.00" : {
+			"carga" : 68,
+			"faltas" : 0,
+			"notas":[]
+		},
+		"1052.1.00" : {
+			"carga" : 68,
+			"faltas" : 4,
+			"notas":[]
+		},
+		"1053.1.00" : {
+			"carga" : 68,
+			"faltas" : 0,
+			"notas":[]
+		},
+		"1055.1.00" : {
+			"carga" : 68,
+			"faltas" : 0,
+			"notas":[]
+		},
+		"3636.1.00" : {
 			"carga" : 34,
 			"faltas" : 0,
 			"notas":[]

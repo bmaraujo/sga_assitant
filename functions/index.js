@@ -120,7 +120,7 @@ app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 
 	console.log(`contexto:${conv.contexts.get(CONTEXTS.BUSCAR_NOTA)}`);
 
-	followUpObterMatricula(matricula);
+	followUpObterMatricula(matricula,conv);
 	
 });
 
@@ -376,7 +376,7 @@ function getSemestreLetivo(){
 	return calendario[sem];
 }
 
-function followUpObterMatricula(matricula) {
+function followUpObterMatricula(matricula,conv) {
 
 	let disciplina = conv.user.storage.disciplina;
 
@@ -451,7 +451,7 @@ function getGrades(matricula,disciplina){
 		resposta = getRandomEntry(dialogs[PHRASES.SUA_NOTA]).replace('$1',total);
 	}
 
-	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.NOTA_MAIS_DETALHES])}`);
+	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`);
 }
 
 function checkUpdates(conv){

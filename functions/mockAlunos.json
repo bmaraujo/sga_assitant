@@ -65,5 +65,96 @@
 				"hora": ""
 			}]
 		}]
+	},
+	"579878" : {
+		"nome" : "Anderson",
+		"disciplinas": [{
+			"codigo":"0408.1.00",
+			"nome" : "Logística de Disitribuição",
+			"sinonimos": ["Logística","LD"]
+		},
+		{
+			"codigo":"1050.1.00",
+			"nome": "Gestão de Vendas, Distribuiição e Comunicação",
+			"sinonimos": ["Gestão", "Gestão de Vendas", "GVDC", "Gestão de Vendas Distribuiição e Comunicação"]
+		},
+		{
+			"codigo":"1052.1.00",
+			"nome":"Métodos Quantitativos Aplicados à Administração",
+			"sinonimos": ["Métodos","Métodos Quantitativos","Métodos Quantitativos Aplicados"]
+		},
+		{
+			"codigo":"1053.1.00",
+			"nome":"Relações de Trabalho",
+			"sinonimos": ["Relações"]
+		},
+		{
+			"codigo":"1055.1.00",
+			"nome":"Sistema Financeiro Nacional",
+			"sinonimos": ["Sistema","Sistema Financeiro"]
+		},
+		{
+			"codigo":"03636.1.00",
+			"nome":"Práticas Empresariais",
+			"sinonimos": ["Práticas"]
+		}],
+		"horario":[{
+			"diaSemana": 1,
+			"aulas":[{
+				"materia": "0408.1.00",
+				"hora":""
+			},
+			{
+				"materia":"1050.1.00",
+				"hora":""
+			}]
+		},
+		{
+			"diaSemana": 2,
+			"aulas":[{
+				"materia":"1050.1.00",
+				"hora":""
+			},
+			{
+				"materia":"1052.1.00",
+				"hora":""
+			}]
+		},
+		{
+			"diaSemana": 3,
+			"aulas":[{
+				"materia":"1052.1.00",
+				"hora":""
+			},
+			{
+				"materia": "1053.1.00",
+				"hora": ""
+			}]
+		},
+		{
+			"diaSemana": 4,
+			"aulas": [{
+				"materia": "1053.1.00",
+				"hora": ""
+			},{
+				"materia": "1055.1.00",
+				"hora": ""
+			}]
+		},
+		{
+			"diaSemana": 5,
+			"aulas":[{
+				"materia": "1055.1.00",
+				"hora": ""
+			},
+			{
+				"materia": "3636.1.00",
+				"hora": ""
+			}]
+		},
+		{
+			"diaSemana": 6,
+			"aulas":""
+		}]
 	}
 }
