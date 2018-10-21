@@ -31,7 +31,9 @@ const PHRASES = {
 	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
 	QTD_FALTAS : 'QTD_FALTAS',
 	QTD_FALTAS_ZERO : 'QTD_FALTAS_ZERO',
+	QUAL_MATERIA : "QUAL_MATERIA",
 	SEMESTRE_LETIVO : 'SEMESTRE_LETIVO',
+	SAIR : "SAIR",
 	SUA_NOTA : 'SUA_NOTA',
 	TEM_AULA_DIA : 'TEM_AULA_DIA',
 	WELCOME :  'WELCOME',
@@ -59,6 +61,8 @@ app.intent('Default Welcome Intent', (conv) => {
 	let aluno = conv.user.storage.aluno;
 
 	console.log(`locale? ${conv.user.locale}, aluno:${aluno}`);
+	console.log(`CONV:${JSON.stringify(conv)}`);
+	console.log(`convId:${conv.request.session} `);
 	if(!conv.user.last.seen){
 		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.WELCOME_FIRST]).replace('$1',appName)));
 	}
@@ -88,11 +92,19 @@ app.intent('sga.buscarNota', (conv, {disciplina}) => {
 		conv.user.storage.disciplina = disciplina;
 
 		//asks for PUC ID
-		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
 	}
 	else{
-		
-		conv.ask(getGrades(matricula,disciplina));
+		if(!disciplina && !conv.user.storage.disciplina){
+			conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_NOTA;
+			conv.ask(buildSpeech(getRandomEntry(getRandomEntry(dialogs[PHRASES.ACK]) + ", " +dialogs[PHRASES.QUAL_MATERIA])));
+		}
+		else{
+			if(!disciplina){
+				disciplina = conv.user.storage.disciplina;
+			}
+			conv.ask(getGrades(matricula,disciplina));
+		}
 	}
 });
 
@@ -124,6 +136,14 @@ app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 	
 });
 
+app.intent('sga.qualMateria', (conv, {disciplina}) =>{
+
+	conv.user.storage.disciplina = disciplina;
+	let matricula = conv.user.storage.matricula;
+
+	followUpObterMatricula(matricula,conv);
+});
+
 app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
 
 
@@ -143,11 +163,19 @@ app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
 		conv.user.storage.disciplina = disciplina;
 
 		//asks for PUC ID
-		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
 	}
 	else{
-		
-		conv.ask(getAttendance(matricula,disciplina));
+		if(!disciplina && !conv.user.storage.disciplina){
+			conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_FALTAS;
+			conv.ask(buildSpeech(getRandomEntry(getRandomEntry(dialogs[PHRASES.ACK]) + ", " +dialogs[PHRASES.QUAL_MATERIA])));
+		}
+		else{
+			if(!disciplina){
+				disciplina = conv.user.storage.disciplina;
+			}
+			conv.ask(getAttendance(matricula,disciplina));
+		}
 	}
 });
 
@@ -266,7 +294,7 @@ app.intent('sga.calendario.horario', (conv,{dia}) =>{
 		conv.user.storage.dia = dia;
 
 		//asks for PUC ID
-		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ',' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
 	}
 	else{
 		
@@ -284,6 +312,12 @@ app.intent('apagar.qualMatricula', (conv) =>{
 	
 	conv.ask('A matricula é ' + conv.user.storage.matricula);
 	
+});
+
+app.intent("sga.sair", (conv) =>{
+	conv.user.storage.disciplina = undefined;
+	conv.user.storage.proximaAcao = undefined;
+	conv.close(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.SAIR])))
 });
 
 exports.sgaAssistant = functions.https.onRequest(app);
@@ -477,4 +511,33 @@ function dateDiffInDays(d1,d2){
 	const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
 
 	return Math.floor((utc1-utc2)/(1000*60*60*24));
+}
+
+function createUserEntities(){
+	let url = "https://api.dialogflow.com/v1/userEntities?v=20150910";
+
+	let entities = {
+	  "entities": [
+	    {
+	      "entries": [
+	        {
+	          "synonyms": [
+	            "user-apple",
+	            "user-red apple"
+	          ],
+	          "value": "user-apple"
+	        },
+	        {
+	          "synonyms": [
+	            "user-banana"
+	          ],
+	          "value": "user-banana"
+	        }
+	      ],
+	      "name": "user-fruit"
+	    }
+	  ],
+	  "sessionId": "12345"
+	};
+
 }
