@@ -1,7 +1,7 @@
 {
 	"WELCOME_FIRST":["Olá, seja bem vindo ao $1, posso te ajudar a ver suas notas, faltas, ver o calendário do semestre e seu quadro de horários,<break time='50ms'/> o que você quer fazer agora?"],
 	"WELCOME": ["Olá, seja bem vindo de volta, o que vamos olhar agora?"],
-	"ACK" : ["OK", "Certo", "Tudo bem", "Entendi"],
+	"ACK" : ["OK", "Certo", "Tudo bem", "Entendi", "Beleza"],
 	"ASK_PUCID" : ["Parece que ainda não tenho seu número de matrícula.</s><s>Pode me falar?", "Para isto preciso do seu número de matrícula.</s><s>Pode me falar?", "Me fale seu número de matrícula."],
 	"SUA_NOTA" : ["Sua nota é $1 pontos.", "Até agora você está com $1 pontos.", "Você tem $1 pontos."],
 	"MATERIA_NOT_FOUND" : ["Não achei esta matéria na sua lista de matérias cursadas deste semestre."],
@@ -19,5 +19,7 @@
 	"HORARIO_SEM_AULA":["Neste dia você não faz nenhuma matéria.","Você não tem aula neste dia.", "Você não tem aula"],
 	"HORARIO_SO_UMA_AULA" : ["Você só tem aula de $1.", "Está tranquilo, só tem $1"],
 	"HORARIO_AULA" : ["Primeiro você tem aula de $1, ", "Começa com $1", "Pra começar você tem $1"],
-	"HORARIO_MAIS_AULA" : ["e depois aula de $1", "em seguida tem $1", "logo depois tem $1", "$1 na sequência", "depois tem $1"]
+	"HORARIO_MAIS_AULA" : ["e depois aula de $1", "em seguida tem $1", "logo depois tem $1", "$1 na sequência", "depois tem $1"],
+	"QUAL_MATERIA" : ["mas de qual matéria você quer saber?","de qual matéria?","de que disciplina estamos falando?"],
+	"SAIR" : ["muito obrigado por utilizar o SGA Aluno, até a próxiima","abraços e até a próxima","boas aulas e até mais tarde", "até mais tarde","tchauzinho","até mais"]
 }

@@ -100,10 +100,7 @@
 		}],
 		"horario":[{
 			"diaSemana": 1,
-			"aulas":[{
-				"materia": "0408.1.00",
-				"hora":""
-			},
+			"aulas":[
 			{
 				"materia":"1050.1.00",
 				"hora":""
@@ -112,24 +109,25 @@
 		{
 			"diaSemana": 2,
 			"aulas":[{
-				"materia":"1050.1.00",
+				"materia":"03636.1.00",
 				"hora":""
 			},
 			{
-				"materia":"1052.1.00",
+				"materia":"0408.1.00",
 				"hora":""
 			}]
 		},
 		{
 			"diaSemana": 3,
 			"aulas":[{
-				"materia":"1052.1.00",
-				"hora":""
-			},
-			{
 				"materia": "1053.1.00",
 				"hora": ""
-			}]
+			},
+			{
+				"materia":"1052.1.00",
+				"hora":""
+			}
+			]
 		},
 		{
 			"diaSemana": 4,
@@ -137,24 +135,28 @@
 				"materia": "1053.1.00",
 				"hora": ""
 			},{
-				"materia": "1055.1.00",
+				"materia": "1050.1.00",
 				"hora": ""
 			}]
 		},
 		{
 			"diaSemana": 5,
 			"aulas":[{
-				"materia": "1055.1.00",
+				"materia": "1052.1.00",
 				"hora": ""
 			},
 			{
-				"materia": "3636.1.00",
+				"materia": "1055.1.00",
 				"hora": ""
-			}]
+			}
+			]
 		},
 		{
 			"diaSemana": 6,
-			"aulas":""
+			"aulas":[{
+				"materia":"1055.1.00",
+				"hora":""
+			}]
 		}]
 	},
 	"040679" : {
@@ -182,6 +184,56 @@
 		{
 			"diaSemana": 4,
 			"aulas": ""
+		},
+		{
+			"diaSemana": 5,
+			"aulas":""
+		},
+		{
+			"diaSemana": 6,
+			"aulas":""
+		}]
+	},
+	"999999" : {
+		"nome" : "Aluno de Exemplo",
+		"disciplinas": [{
+			"codigo":"0515.1.01",
+			"nome":"Trabalho de Conclusão de Curso",
+			"sinonimos": ["TCC2","TCC 2", "TCC","Trabalho de Conclusão"]
+		},
+		{
+			"codigo":"9998.9.99",
+			"nome": "Matéria Teste",
+			"sinonimos": ["Teste"]
+		}],
+		"horario":[{
+			"diaSemana": 1,
+			"aulas":[{
+				"materia": "0515.1.01",
+				"hora":""
+			}]
+		},
+		{
+			"diaSemana": 2,
+			"aulas":[{
+				"materia": "9998.9.99",
+				"hora":""
+			}]
+		},
+		{
+			"diaSemana": 3,
+			"aulas":""
+		},
+		{
+			"diaSemana": 4,
+			"aulas":[{
+				"materia": "0515.1.01",
+				"hora":""
+			},
+			{
+				"materia": "9998.9.99",
+				"hora":""
+			}]
 		},
 		{
 			"diaSemana": 5,
