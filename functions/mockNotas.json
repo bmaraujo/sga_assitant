@@ -25,7 +25,22 @@
 		"0515.1.01" : {
 			"carga" : 34,
 			"faltas" : 0,
-			"notas":[]
+			"notas":[{
+				"atividade": "relatório agosto",
+				"nota": 10
+			},
+			{
+				"atividade": "relatório setembro",
+				"nota": 7
+			},
+			{
+				"atividade": "relatório agosto",
+				"nota": 8
+			},
+			{
+				"atividade": "relatório setembro",
+				"nota": 6
+			}]
 		}
 	},
 	"579878" : {

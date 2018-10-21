@@ -77,36 +77,17 @@ app.intent('Default Welcome Intent', (conv) => {
 
 app.intent('sga.buscarNota', (conv, {disciplina}) => {
 
-	conv.contexts.set(CONTEXTS.BUSCAR_NOTA,5);
+	getGradesOrAttendance(conv,CONTEXTS.BUSCAR_NOTA,disciplina);
 
-	let matricula = conv.user.storage.matricula; 
-	console.log(`matricula: ${matricula}`);
-	if(!matricula){
-		console.log(`perguntar matricula`);
-		//no student id found, ask for it
-		conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
-		// raise the lifespan of BUSCAR_NOTA contexts
-		conv.contexts.set(CONTEXTS.BUSCAR_NOTA,15);
-
-		conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_NOTA;
-		conv.user.storage.disciplina = disciplina;
-
-		//asks for PUC ID
-		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
-	}
-	else{
-		if(!disciplina && !conv.user.storage.disciplina){
-			conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_NOTA;
-			conv.ask(buildSpeech(getRandomEntry(getRandomEntry(dialogs[PHRASES.ACK]) + ", " +dialogs[PHRASES.QUAL_MATERIA])));
-		}
-		else{
-			if(!disciplina){
-				disciplina = conv.user.storage.disciplina;
-			}
-			conv.ask(getGrades(matricula,disciplina));
-		}
-	}
 });
+
+
+app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
+
+	getGradesOrAttendance(conv,CONTEXTS.BUSCAR_FALTAS,disciplina);
+
+});
+
 
 app.intent('sga.obterMatricula', (conv, {matricula}) =>{
 	console.log(`obtem matricula: ${matricula}`);
@@ -141,42 +122,9 @@ app.intent('sga.qualMateria', (conv, {disciplina}) =>{
 	conv.user.storage.disciplina = disciplina;
 	let matricula = conv.user.storage.matricula;
 
+	console.log(`salvando ${disciplina} no storage`);
+
 	followUpObterMatricula(matricula,conv);
-});
-
-app.intent('sga.buscarFaltas', (conv, {disciplina})=>{
-
-
-
-	conv.contexts.set(CONTEXTS.BUSCAR_FALTAS,5);
-
-	let matricula = conv.user.storage.matricula; 
-	console.log(`matricula: ${matricula}`);
-	if(!matricula){
-		console.log(`perguntar matricula`);
-		//no student id found, ask for it
-		conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
-		// raise the lifespan of BUSCAR_FALTAS contexts
-		conv.contexts.set(CONTEXTS.BUSCAR_FALTAS,15);
-
-		conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_FALTAS;
-		conv.user.storage.disciplina = disciplina;
-
-		//asks for PUC ID
-		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
-	}
-	else{
-		if(!disciplina && !conv.user.storage.disciplina){
-			conv.user.storage.proximaAcao = CONTEXTS.BUSCAR_FALTAS;
-			conv.ask(buildSpeech(getRandomEntry(getRandomEntry(dialogs[PHRASES.ACK]) + ", " +dialogs[PHRASES.QUAL_MATERIA])));
-		}
-		else{
-			if(!disciplina){
-				disciplina = conv.user.storage.disciplina;
-			}
-			conv.ask(getAttendance(matricula,disciplina));
-		}
-	}
 });
 
 app.intent('sga.calendario.semestre_letivo',(conv) =>{
@@ -366,6 +314,51 @@ function getClassSchedule(matricula, dia){
 	}
 
 	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`);
+}
+
+function getGradesOrAttendance(conv,context,disciplina){
+	conv.contexts.set(context,5);
+
+	let matricula = conv.user.storage.matricula; 
+	console.log(`matricula: ${matricula}`);
+	if(!matricula){
+		console.log(`perguntar matricula`);
+		//no student id found, ask for it
+		conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
+		// raise the lifespan of BUSCAR_NOTA contexts
+		conv.contexts.set(context,15);
+
+		conv.user.storage.proximaAcao = context;
+		conv.user.storage.disciplina = disciplina;
+
+		//asks for PUC ID
+		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+	}
+	else{
+		console.log(`disciplina:${disciplina} && ${conv.user.storage.disciplina} = ${!disciplina} && ${!conv.user.storage.disciplina}`);
+		if(!disciplina && !conv.user.storage.disciplina){
+			console.log(`Sem disciplina salva, buscar matéria`);
+			conv.user.storage.proximaAcao = context;
+			let frase = getRandomEntry(dialogs[PHRASES.ACK]) + ", " + getRandomEntry(dialogs[PHRASES.QUAL_MATERIA]);
+			console.log(frase);
+			conv.ask(buildSpeech(frase));
+		}
+		else{
+			if(!disciplina){
+				disciplina = conv.user.storage.disciplina;
+			}
+			console.log(`Nota ou Falta? ${context}`);
+			if(context == CONTEXTS.BUSCAR_NOTA){
+				console.log(`nota para ${disciplina}`);
+				conv.ask(getGrades(matricula,disciplina));
+			}
+			else{
+				console.log(`faltas para ${disciplina}`);
+				conv.ask(getAttendance(matricula,disciplina));
+			}
+			
+		}
+	}
 }
 
 function getClassName(codigo,disciplinas){
