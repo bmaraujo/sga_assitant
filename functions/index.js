@@ -20,6 +20,9 @@ const PHRASES = {
 	ASK_PUCID : 'ASK_PUCID',
 	AULA_PERIODO : 'AULA_PERIODO',
 	AULA_TODO_PERIODO : 'AULA_TODO_PERIODO',
+	CONFIRMAR : 'CONFIRMAR',
+	CONFIRMAR_MATRICULA : 'CONFIRMAR_MATRICULA',
+	ERRO_DADOS : "ERRO_DADOS",
 	HORARIO_AULA : "HORARIO_AULA",
 	HORARIO_MAIS_AULA : "HORARIO_MAIS_AULA",
 	HORARIO_SEM_AULA : "HORARIO_SEM_AULA",
@@ -27,6 +30,7 @@ const PHRASES = {
 	MATERIA_NOT_FOUND : 'MATERIA_NOT_FOUND',
 	NAO_AULA_PERIODO : 'NAO_AULA_PERIODO',
 	NAO_AULA_TODO_PERIODO : 'NAO_AULA_TODO_PERIODO',
+	NÂO_DADOS_MATRICULA : 'NÂO_DADOS_MATRICULA',
 	NAO_TEM_AULA_DIA : 'NAO_TEM_AULA_DIA',
 	NOTA_MAIS_DETALHES : 'NOTA_MAIS_DETALHES',
 	QTD_FALTAS : 'QTD_FALTAS',
@@ -45,6 +49,7 @@ const CONTEXTS = {
 	BUSCAR_ALUNO : "BUSCAR_ALUNO",
 	BUSCAR_FALTAS : "BUSCAR_FALTAS",
 	QUADRO_HORARIO : "QUADRO_HORARIO",
+	CONFIRMAR_MATRICULA : "CONFIRMAR_MATRICULA"
 }
 
 const config = {
@@ -246,15 +251,12 @@ app.intent('sga.calendario.horario', (conv,{dia}) =>{
 
 });
 
-app.intent('apagar.resetaAluno', (conv) => {
-	conv.user.storage = "";
-	conv.ask('Aluno apagado');
+app.intent("sga.ConfirmarMatricula_sim", (conv) =>{
+	conv.close(buildSpeech(getRandomEntry(dialogs[PHRASES.ERRO_DADOS])));
 });
 
-app.intent('apagar.qualMatricula', (conv) =>{
-	
-	conv.ask('A matricula é ' + conv.user.storage.matricula);
-	
+app.intent("sga.ConfirmarMatricula_nao", (conv) =>{
+	getPucId(conv,CONTEXTS.BUSCAR_NOTA, null);
 });
 
 app.intent("sga.sair", (conv) =>{
@@ -311,6 +313,22 @@ function getClassSchedule(matricula, dia){
 	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`);
 }
 
+function getPucId(conv, context,disciplina){
+	console.log(`perguntar matricula`);
+	//no student id found, ask for it
+	conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
+	// raise the lifespan of BUSCAR_NOTA contexts
+	conv.contexts.set(context,15);
+
+	conv.user.storage.proximaAcao = context;
+	if(disciplina){
+		conv.user.storage.disciplina = disciplina;
+	}
+
+	//asks for PUC ID
+	conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+}
+
 function getGradesOrAttendance(conv,context,disciplina){
 	conv.contexts.set(context,5);
 
@@ -320,17 +338,8 @@ function getGradesOrAttendance(conv,context,disciplina){
 	}
 	console.log(`matricula: ${matricula}`);
 	if(!matricula){
-		console.log(`perguntar matricula`);
-		//no student id found, ask for it
-		conv.contexts.set(CONTEXTS.BUSCAR_ALUNO,5);
-		// raise the lifespan of BUSCAR_NOTA contexts
-		conv.contexts.set(context,15);
 
-		conv.user.storage.proximaAcao = context;
-		conv.user.storage.disciplina = disciplina;
-
-		//asks for PUC ID
-		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.ACK]) +  ', ' + getRandomEntry(dialogs[PHRASES.ASK_PUCID])));
+		getPucId(conv, context,disciplina);
 	}
 	else{
 		console.log(`disciplina:${disciplina} && ${conv.user.storage.disciplina} = ${!disciplina} && ${!conv.user.storage.disciplina}`);
@@ -346,7 +355,7 @@ function getGradesOrAttendance(conv,context,disciplina){
 			console.log(`Nota ou Falta? ${context}`);
 			if(context == CONTEXTS.BUSCAR_NOTA){
 				console.log(`nota para ${disciplina}`);
-				conv.ask(getGrades(matricula,disciplina));
+				conv.ask(getGrades(conv,matricula,disciplina));
 			}
 			else{
 				console.log(`faltas para ${disciplina}`);
@@ -453,23 +462,21 @@ function getAttendance(matricula,disciplina){
 	return buildSpeech(`${getRandomEntry(dialogs[PHRASES.ACK])}.</s><s>${resposta}</s><s>${getRandomEntry(dialogs[PHRASES.ALGO_MAIS])}`);
 }
 
-function getGrades(matricula,disciplina){
+function getGrades(conv,matricula,disciplina){
 
 	let resposta = '';
 
 	console.log(JSON.stringify(mockNotas));
 	console.log(`${matricula} : ${disciplina}`);
 
-	//Usuário pode não ter informado a disciplina
-	if(!disciplina || disciplina == ""){
-
+	if(!mockNotas[matricula]){
+		conv.contexts.set(CONTEXTS.CONFIRMAR_MATRICULA,5);
+		return buildSpeech(`${getRandomEntry(dialogs[PHRASES.NÂO_DADOS_MATRICULA])}, ${getRandomEntry(dialogs[PHRASES.CONFIRMAR_MATRICULA]).replace("$1",matricula)}, ${getRandomEntry(dialogs[PHRASES.CONFIRMAR])}`);
 	}
-
 	console.log(`somar as atividades`);
 	let materia = mockNotas[matricula][disciplina];
 	if(!materia){
 		resposta = getRandomEntry(dialogs[PHRASES.MATERIA_NOT_FOUND]);
-		//TODO: read all subjects the student is enrolled at
 	}
 	else{
 		let total = 0;
