@@ -21,5 +21,9 @@
 	"HORARIO_AULA" : ["Primeiro você tem aula de $1, ", "Começa com $1", "Pra começar você tem $1"],
 	"HORARIO_MAIS_AULA" : ["e depois aula de $1", "em seguida tem $1", "logo depois tem $1", "$1 na sequência", "depois tem $1"],
 	"QUAL_MATERIA" : ["mas de qual matéria você quer saber?","de qual matéria?","de que disciplina estamos falando?"],
-	"SAIR" : ["muito obrigado por utilizar o SGA Aluno, até a próxiima","abraços e até a próxima","boas aulas e até mais tarde", "até mais tarde","tchauzinho","até mais"]
+	"SAIR" : ["muito obrigado por utilizar o SGA Aluno, até a próxima","abraços e até a próxima","boas aulas e até mais tarde", "até mais tarde","tchauzinho","até mais"],
+	"CONFIRMAR_MATRICULA" : ["sua matrícula é <say-as interpret-as='characters'>$1</say-as>", "<say-as interpret-as='characters'>$1</say-as> é o número da sua matrícula"],
+	"CONFIRMAR" : ["certo?","correto?","né?"],
+	"NÂO_DADOS_MATRICULA" : ["Não consegui encontrar","Que estranho, não achei nada aqui","Não achei nada"],
+	"ERRO_DADOS" : ["Algo está errado com seus dados, entre em contato com o administrador do sistema."]
 }
