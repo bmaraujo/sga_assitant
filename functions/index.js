@@ -58,11 +58,6 @@ firebase.initializeApp(config);
 
 app.intent('Default Welcome Intent', (conv) => {
 
-	let aluno = conv.user.storage.aluno;
-
-	console.log(`locale? ${conv.user.locale}, aluno:${aluno}`);
-	console.log(`CONV:${JSON.stringify(conv)}`);
-	console.log(`convId:${conv.request.session} `);
 	if(!conv.user.last.seen){
 		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.WELCOME_FIRST]).replace('$1',appName)));
 	}
@@ -252,7 +247,7 @@ app.intent('sga.calendario.horario', (conv,{dia}) =>{
 });
 
 app.intent('apagar.resetaAluno', (conv) => {
-	conv.user.storage = undefined;
+	conv.user.storage = "";
 	conv.ask('Aluno apagado');
 });
 
@@ -319,7 +314,10 @@ function getClassSchedule(matricula, dia){
 function getGradesOrAttendance(conv,context,disciplina){
 	conv.contexts.set(context,5);
 
-	let matricula = conv.user.storage.matricula; 
+	let matricula;
+	if(conv.user.storage != null){
+		matricula = conv.user.storage.matricula; 
+	}
 	console.log(`matricula: ${matricula}`);
 	if(!matricula){
 		console.log(`perguntar matricula`);
@@ -337,11 +335,9 @@ function getGradesOrAttendance(conv,context,disciplina){
 	else{
 		console.log(`disciplina:${disciplina} && ${conv.user.storage.disciplina} = ${!disciplina} && ${!conv.user.storage.disciplina}`);
 		if(!disciplina && !conv.user.storage.disciplina){
-			console.log(`Sem disciplina salva, buscar matéria`);
-			conv.user.storage.proximaAcao = context;
-			let frase = getRandomEntry(dialogs[PHRASES.ACK]) + ", " + getRandomEntry(dialogs[PHRASES.QUAL_MATERIA]);
-			console.log(frase);
-			conv.ask(buildSpeech(frase));
+
+			getSubject(conv,context);
+
 		}
 		else{
 			if(!disciplina){
@@ -359,6 +355,14 @@ function getGradesOrAttendance(conv,context,disciplina){
 			
 		}
 	}
+}
+
+function getSubject(conv, context){
+	console.log(`Sem disciplina salva, buscar matéria`);
+	conv.user.storage.proximaAcao = context;
+	let frase = getRandomEntry(dialogs[PHRASES.ACK]) + ", " + getRandomEntry(dialogs[PHRASES.QUAL_MATERIA]);
+	console.log(frase);
+	conv.ask(buildSpeech(frase));
 }
 
 function getClassName(codigo,disciplinas){
@@ -407,19 +411,11 @@ function followUpObterMatricula(matricula,conv) {
 
 	let disciplina = conv.user.storage.disciplina;
 
-	//if it was searching for grades
-	if(conv.user.storage.proximaAcao === CONTEXTS.BUSCAR_NOTA){
-		conv.ask(getGrades(matricula,disciplina));
-	}
-	else if(conv.user.storage.proximaAcao === CONTEXTS.BUSCAR_FALTAS){
-		conv.ask(getAttendance(matricula,disciplina));
-	}
-	else if(conv.user.storage.proximaAcao === CONTEXTS.QUADRO_HORARIO){
+	if(conv.user.storage.proximaAcao === CONTEXTS.QUADRO_HORARIO){
 		getClassSchedule(matricula,conv.user.storage.dia)
 	}
-	else{
-		//TODO
-		conv.ask('Ok, sua matricula foi salva.');
+	else {
+		getGradesOrAttendance(conv,conv.user.storage.proximaAcao,disciplina);
 	}
 }
 
@@ -463,6 +459,11 @@ function getGrades(matricula,disciplina){
 
 	console.log(JSON.stringify(mockNotas));
 	console.log(`${matricula} : ${disciplina}`);
+
+	//Usuário pode não ter informado a disciplina
+	if(!disciplina || disciplina == ""){
+
+	}
 
 	console.log(`somar as atividades`);
 	let materia = mockNotas[matricula][disciplina];
