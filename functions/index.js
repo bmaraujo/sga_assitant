@@ -58,11 +58,6 @@ firebase.initializeApp(config);
 
 app.intent('Default Welcome Intent', (conv) => {
 
-	let aluno = conv.user.storage.aluno;
-
-	console.log(`locale? ${conv.user.locale}, aluno:${aluno}`);
-	console.log(`CONV:${JSON.stringify(conv)}`);
-	console.log(`convId:${conv.request.session} `);
 	if(!conv.user.last.seen){
 		conv.ask(buildSpeech(getRandomEntry(dialogs[PHRASES.WELCOME_FIRST]).replace('$1',appName)));
 	}
@@ -252,7 +247,7 @@ app.intent('sga.calendario.horario', (conv,{dia}) =>{
 });
 
 app.intent('apagar.resetaAluno', (conv) => {
-	conv.user.storage = undefined;
+	conv.user.storage = "";
 	conv.ask('Aluno apagado');
 });
 
@@ -319,7 +314,10 @@ function getClassSchedule(matricula, dia){
 function getGradesOrAttendance(conv,context,disciplina){
 	conv.contexts.set(context,5);
 
-	let matricula = conv.user.storage.matricula; 
+	let matricula;
+	if(conv.user.storage != null){
+		matricula = conv.user.storage.matricula; 
+	}
 	console.log(`matricula: ${matricula}`);
 	if(!matricula){
 		console.log(`perguntar matricula`);
